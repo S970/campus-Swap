@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#14213D">
+<meta name="description" content="CampusSwap is a student-to-student marketplace to buy, sell, swap or give away textbooks, calculators, furniture, cycles and more.">
+<title>CampusSwap: buy, sell, swap or give away on campus</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🔁%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#14213D; --paper:#EEF1F6; --white:#fff; --hi:#FFD23F; --teal:#0E8388;
+  --muted:#566074; --line:#CBD3E1; --danger:#A4161A;
+  --display:'Bricolage Grotesque','Segoe UI',system-ui,sans-serif;
+  --body:'Public Sans','Segoe UI',system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 16px/1.5 var(--body)}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--teal);outline-offset:2px}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* Buttons */
+.btn{display:inline-block;border:2px solid var(--ink);background:var(--hi);color:var(--ink);border-radius:10px;padding:9px 16px;font-weight:600;text-decoration:none;text-align:center;box-shadow:3px 3px 0 var(--ink);transition:transform .12s,box-shadow .12s}
+.btn:hover{transform:translate(-1px,-1px);box-shadow:4px 4px 0 var(--ink)}
+.btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+.btn.ghost{background:var(--white)}
+.btn.danger{background:var(--white);color:var(--danger);border-color:var(--danger);box-shadow:3px 3px 0 var(--danger)}
+
+/* Header */
+.top{position:sticky;top:0;z-index:20;background:var(--white);border-bottom:2px solid var(--ink)}
+.top .wrap{display:flex;align-items:center;gap:12px;height:64px}
+.brand{display:flex;align-items:center;gap:8px;margin-right:auto;color:var(--ink);text-decoration:none;font:800 1.35rem var(--display);letter-spacing:-.02em}
+.brand svg{width:28px;height:28px;padding:4px;border-radius:8px;background:var(--hi);border:2px solid var(--ink)}
+.campus{max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;border:2px solid var(--ink);background:var(--paper);border-radius:999px;padding:6px 14px;font-size:.875rem;font-weight:600}
+
+/* Hero */
+.hero{background:var(--ink);color:#fff;padding:56px 0 64px}
+.hero h1{margin:0 0 16px;font:800 clamp(2.8rem,9vw,5.2rem)/.95 var(--display);letter-spacing:-.035em}
+.hero p{max-width:46ch;margin:0 0 28px;color:#C9D2E6;font-size:1.1rem}
+.search{display:flex;max-width:640px;border:2px solid var(--hi);border-radius:12px;background:var(--white);overflow:hidden}
+.search:focus-within{box-shadow:0 0 0 3px var(--teal)}
+.search input{flex:1;min-width:0;border:0;background:transparent;color:var(--ink);padding:16px 18px;font-size:1.05rem}
+.search input:focus-visible{outline:none}
+.search button{border:0;background:var(--hi);color:var(--ink);padding:0 22px;font-weight:700}
+
+/* Filters */
+.cats{display:flex;gap:8px;overflow-x:auto;padding:24px 2px 10px;scrollbar-width:thin}
+.chip{flex:none;border:2px solid var(--ink);background:var(--white);border-radius:999px;padding:7px 14px;font-weight:600;font-size:.9rem;white-space:nowrap}
+.chip[aria-pressed=true]{background:var(--ink);color:#fff}
+.bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 16px;margin:10px 0 24px}
+.seg{display:inline-flex;border:2px solid var(--ink);border-radius:10px;overflow:hidden;background:var(--white)}
+.seg button{border:0;background:transparent;padding:7px 14px;font-weight:600;font-size:.9rem}
+.seg button+button{border-left:2px solid var(--ink)}
+.seg button[aria-pressed=true]{background:var(--ink);color:#fff}
+.opts{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;font-size:.9rem}
+.opts label{display:flex;align-items:center;gap:6px}
+select{border:2px solid var(--ink);border-radius:10px;padding:7px 10px;background:var(--white)}
+.count{font-weight:600}
+
+/* Listing grid: hang-tag cards */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:28px 22px;margin:0;padding:6px 6px 64px;list-style:none}
+.item{position:relative}
+.tag{position:relative;display:block;width:100%;padding:0;text-align:left;background:var(--white);border:2px solid var(--ink);border-radius:8px 8px 14px 14px;box-shadow:5px 5px 0 var(--ink);transition:transform .12s,box-shadow .12s}
+.tag:hover{transform:translate(-2px,-2px);box-shadow:7px 7px 0 var(--ink)}
+.tag::before{content:"";position:absolute;z-index:2;top:10px;left:50%;width:14px;height:14px;margin-left:-7px;border-radius:50%;background:var(--paper);border:2px solid var(--ink)}
+.pic{position:relative;display:grid;place-items:center;aspect-ratio:4/3;overflow:hidden;font-size:3.6rem;border-bottom:2px solid var(--ink);border-radius:6px 6px 0 0}
+.pic img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.badge{position:absolute;left:10px;bottom:10px;border:2px solid var(--ink);border-radius:6px;padding:1px 9px;font:700 .95rem var(--body);background:var(--hi);color:var(--ink)}
+.badge.swap{background:var(--teal);color:#fff}
+.badge.free{background:var(--ink);color:var(--hi)}
+.info{display:block;padding:12px 14px 14px}
+.info b{display:block;margin-bottom:6px;font:700 1.05rem/1.2 var(--display)}
+.meta{display:flex;justify-content:space-between;gap:8px;font-size:.82rem;color:var(--muted)}
+.sold .tag{opacity:.6}
+.stamp{position:absolute;z-index:1;padding:2px 14px;border:3px solid var(--danger);border-radius:6px;background:rgba(255,255,255,.85);color:var(--danger);font:800 1.5rem var(--display);transform:rotate(-12deg)}
+.empty{grid-column:1/-1;padding:56px 16px;text-align:center}
+.empty h2{margin:0 0 6px;font:700 1.4rem var(--display)}
+.empty p{margin:0 0 18px;color:var(--muted)}
+
+/* Dialogs */
+dialog{width:100%;max-width:min(560px,calc(100vw - 24px));padding:0;border:2px solid var(--ink);border-radius:14px;background:var(--white);color:var(--ink);box-shadow:8px 8px 0 var(--ink)}
+dialog::backdrop{background:rgba(20,33,61,.62)}
+.dlg{position:relative;padding:22px;max-height:calc(100vh - 40px);overflow:auto}
+.dlg h2{margin:0 36px 14px 0;font:800 1.5rem/1.15 var(--display);letter-spacing:-.02em}
+.x{position:absolute;top:12px;right:12px;width:34px;height:34px;border:2px solid var(--ink);border-radius:8px;background:var(--white);font-size:1.3rem;line-height:1}
+.dpic{position:relative;display:grid;place-items:center;aspect-ratio:4/3;margin-bottom:14px;overflow:hidden;font-size:5rem;border:2px solid var(--ink);border-radius:10px}
+.dpic img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.facts{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px}
+.fact{border:2px solid var(--line);border-radius:999px;padding:1px 10px;font-size:.85rem}
+.dlg p{margin:0 0 10px}
+.note{color:var(--muted);font-size:.9rem}
+.actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:16px}
+
+/* Form */
+.f{display:grid;gap:14px}
+.f label{display:grid;gap:5px;font-weight:600;font-size:.9rem}
+.f input:not([type=radio]),.f select,.f textarea{width:100%;padding:9px 11px;border:2px solid var(--ink);border-radius:8px;background:var(--white);font-weight:400}
+.f textarea{min-height:84px;resize:vertical}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.hint{font-weight:400;color:var(--muted);font-size:.8rem}
+.types{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0;padding:0;border:0}
+.f .types label{position:relative;display:block;padding:8px;border:2px solid var(--ink);border-radius:10px;text-align:center;cursor:pointer}
+.types input{position:absolute;opacity:0;pointer-events:none}
+.types label:has(input:checked){background:var(--ink);color:#fff}
+.types label:has(input:focus-visible){outline:3px solid var(--teal);outline-offset:2px}
+.prev{display:flex;align-items:center;gap:12px}
+.prev img{width:72px;height:54px;object-fit:cover;border:2px solid var(--ink);border-radius:8px}
+.err{min-height:1.2em;margin:0;color:var(--danger);font-weight:600;font-size:.9rem}
+
+/* Accounts */
+.seg.tabs{display:flex;width:100%;margin-bottom:12px}
+.seg.tabs button{flex:1}
+.dlg .sub{margin:0 0 14px;color:var(--muted);font-size:.9rem}
+.f label.chk{display:flex;align-items:center;gap:8px;font-weight:400}
+.f label.chk input{width:18px;height:18px;padding:0;border:0;accent-color:var(--ink)}
+.link{justify-self:start;padding:0;border:0;background:none;color:var(--teal);font-weight:600;text-decoration:underline}
+.err.ok{color:var(--teal)}
+.sec{margin-top:20px;padding-top:18px;border-top:2px solid var(--line)}
+.dlg h3{margin:0 0 12px;font:700 1.1rem var(--display)}
+.who{flex:none}
+
+/* Footer + toast */
+footer{background:var(--white);border-top:2px solid var(--ink);padding:22px 0;font-size:.85rem;color:var(--muted)}
+footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 24px}
+footer p{margin:0;max-width:62ch}
+footer button{padding:0;border:0;background:none;color:inherit;text-decoration:underline}
+.toast{position:fixed;left:50%;bottom:24px;z-index:100;padding:10px 18px;border-radius:10px;background:var(--ink);color:#fff;font-weight:600;opacity:0;pointer-events:none;transform:translate(-50%,16px);transition:opacity .2s,transform .2s}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+
+@media (max-width:520px){
+  .top .wrap{height:auto;padding-top:10px;padding-bottom:10px;flex-wrap:wrap}
+  .campus{order:3;max-width:100%}
+  .two{grid-template-columns:1fr}
+  .hero{padding:40px 0 48px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{transition:none!important;scroll-behavior:auto!important}
+}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#" aria-label="CampusSwap home">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h13l-3-3M20 16H7l3 3"/></svg>
+      CampusSwap
+    </a>
+    <button class="campus" id="campusBtn" type="button" aria-label="Change campus"></button>
+    <button class="campus who" id="acctBtn" type="button" aria-label="Your account" hidden></button>
+    <button class="btn ghost" id="loginBtn" type="button">Log in</button>
+    <button class="btn" id="postBtn" type="button">Post an item</button>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="wrap">
+      <h1>Pass it on.</h1>
+      <p>Buy, sell, swap or give away what you no longer need, with students from your own campus.</p>
+      <form class="search" id="searchForm" role="search">
+        <label class="sr" for="q">Search items</label>
+        <input id="q" type="search" placeholder="Search textbooks, cycles, chargers" autocomplete="off">
+        <button type="submit">Search</button>
+      </form>
+    </div>
+  </section>
+
+  <section class="wrap" id="results" aria-label="Listings">
+    <div class="cats" id="cats" role="group" aria-label="Categories"></div>
+    <div class="bar">
+      <div class="seg" id="types" role="group" aria-label="Listing type">
+        <button type="button" data-type="all" aria-pressed="true">All</button>
+        <button type="button" data-type="sell" aria-pressed="false">For sale</button>
+        <button type="button" data-type="swap" aria-pressed="false">Swap</button>
+        <button type="button" data-type="free" aria-pressed="false">Free</button>
+      </div>
+      <div class="opts">
+        <span class="count" id="count" aria-live="polite"></span>
+        <label><input type="checkbox" id="hideSold" checked> Hide sold</label>
+        <label>Sort
+          <select id="sort">
+            <option value="new">Newest</option>
+            <option value="low">Price: low to high</option>
+            <option value="high">Price: high to low</option>
+          </select>
+        </label>
+      </div>
+    </div>
+    <ul class="grid" id="grid"></ul>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>Listings are saved in this browser only. Meet in a public spot on campus and check items before you pay.</p>
+    <button type="button" id="clearSamples" hidden>Remove sample listings</button>
+  </div>
+</footer>
+
+<dialog id="detail" aria-label="Item details"><div class="dlg"></div></dialog>
+
+<dialog id="postDlg" aria-labelledby="postTitle">
+  <div class="dlg">
+    <button class="x" type="button" data-close aria-label="Close">&times;</button>
+    <h2 id="postTitle">Post an item</h2>
+    <form class="f" id="postForm">
+      <fieldset class="types">
+        <legend class="sr">Listing type</legend>
+        <label><input type="radio" name="type" value="sell" checked>Sell</label>
+        <label><input type="radio" name="type" value="swap">Swap</label>
+        <label><input type="radio" name="type" value="free">Give away</label>
+      </fieldset>
+      <label>What is it?
+        <input name="title" required maxlength="70" placeholder="e.g. Engineering Physics textbook">
+      </label>
+      <div class="two">
+        <label>Category<select name="cat" id="catSel"></select></label>
+        <label>Condition
+          <select name="cond">
+            <option>Like new</option>
+            <option selected>Good</option>
+            <option>Fair</option>
+            <option>Worn but works</option>
+          </select>
+        </label>
+      </div>
+      <label id="priceRow"><span id="priceLbl">Price</span>
+        <input name="price" type="number" min="0" step="1" inputmode="numeric" required>
+      </label>
+      <label id="wantsRow" hidden>What would you like in return?
+        <input name="wants" maxlength="80" placeholder="e.g. A desk lamp or a scientific calculator">
+      </label>
+      <label>Details <span class="hint">Edition, size, what's included</span>
+        <textarea name="desc" maxlength="400"></textarea>
+      </label>
+      <div class="two">
+        <label>Your name<input name="seller" required maxlength="40" autocomplete="given-name"></label>
+        <label>WhatsApp number or email
+          <input name="contact" required maxlength="80" autocomplete="off" placeholder="Number or you@college.edu">
+        </label>
+      </div>
+      <label>Photo <span class="hint">Optional</span>
+        <input type="file" id="photo" accept="image/*">
+      </label>
+      <div class="prev" id="prev" hidden>
+        <img alt="Photo preview" id="prevImg">
+        <button class="btn ghost" type="button" id="rmPhoto">Remove photo</button>
+      </div>
+      <p class="err" id="formErr" role="alert"></p>
+      <button class="btn" type="submit" id="submitBtn">Post item</button>
+    </form>
+  </div>
+</dialog>
+
+<dialog id="campusDlg" aria-labelledby="campusTitle">
+  <div class="dlg">
+    <button class="x" type="button" data-close aria-label="Close">&times;</button>
+    <h2 id="campusTitle">Your campus</h2>
+    <form class="f" id="campusForm">
+      <label>College or campus name
+        <input name="campus" required maxlength="50" placeholder="e.g. City Engineering College">
+      </label>
+      <button class="btn" type="submit">Save campus</button>
+    </form>
+  </div>
+</dialog>
+
+<dialog id="authDlg" aria-labelledby="authTitle">
+  <div class="dlg">
+    <button class="x" type="button" data-close aria-label="Close">&times;</button>
+    <h2 id="authTitle">Welcome back</h2>
+    <div class="seg tabs" id="authTabs" role="group" aria-label="Log in or sign up">
+      <button type="button" data-mode="login" aria-pressed="true">Log in</button>
+      <button type="button" data-mode="signup" aria-pressed="false">Sign up</button>
+    </div>
+    <p class="sub" id="authSub"></p>
+    <form class="f" id="authForm" novalidate>
+      <label id="nameRow" hidden>Your name
+        <input name="display_name" maxlength="40" autocomplete="given-name">
+      </label>
+      <label>Email
+        <input name="email" type="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false">
+      </label>
+      <label id="pwRow">Password <span class="hint" id="pwHint"></span>
+        <input name="password" type="password" autocomplete="current-password">
+      </label>
+      <label class="chk" id="showRow"><input type="checkbox" id="showPw"> Show password</label>
+      <p class="err" id="authMsg" role="alert"></p>
+      <button class="btn" type="submit" id="authSubmit">Log in</button>
+      <button class="link" type="button" id="forgotBtn">Forgot password?</button>
+    </form>
+  </div>
+</dialog>
+
+<dialog id="resetDlg" aria-labelledby="resetTitle">
+  <div class="dlg">
+    <button class="x" type="button" data-close aria-label="Close">&times;</button>
+    <h2 id="resetTitle">Set a new password</h2>
+    <form class="f" id="resetForm" novalidate>
+      <label>New password <span class="hint">At least 8 characters</span>
+        <input name="password" type="password" autocomplete="new-password">
+      </label>
+      <label>Confirm new password
+        <input name="confirm" type="password" autocomplete="new-password">
+      </label>
+      <p class="err" id="resetMsg" role="alert"></p>
+      <button class="btn" type="submit" id="resetSubmit">Save new password</button>
+    </form>
+  </div>
+</dialog>
+
+<dialog id="acctDlg" aria-labelledby="acctTitle">
+  <div class="dlg">
+    <button class="x" type="button" data-close aria-label="Close">&times;</button>
+    <h2 id="acctTitle">Your account</h2>
+    <p class="sub" id="acctEmail"></p>
+    <form class="f" id="profileForm" novalidate>
+      <label>Your name
+        <input name="display_name" maxlength="40" autocomplete="given-name">
+      </label>
+      <label>WhatsApp number or email for buyers <span class="hint">Filled in for you when you post</span>
+        <input name="contact" maxlength="80" autocomplete="off" placeholder="Number or you@college.edu">
+      </label>
+      <p class="err" id="profileMsg" role="alert"></p>
+      <button class="btn" type="submit" id="profileSubmit">Save details</button>
+    </form>
+    <div class="sec">
+      <h3>Change password</h3>
+      <form class="f" id="pwForm" novalidate>
+        <label>New password <span class="hint">At least 8 characters</span>
+          <input name="password" type="password" autocomplete="new-password">
+        </label>
+        <label>Confirm new password
+          <input name="confirm" type="password" autocomplete="new-password">
+        </label>
+        <p class="err" id="pwMsg" role="alert"></p>
+        <button class="btn ghost" type="submit" id="pwSubmit">Change password</button>
+      </form>
+    </div>
+    <div class="sec">
+      <button class="btn danger" type="button" id="logoutBtn">Log out</button>
+    </div>
+  </div>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+'use strict';
+
+/* ---------- Settings you can change ---------- */
+const CURRENCY = '₹';
+const DEFAULT_COUNTRY_CODE = '91';   // added to 10-digit phone numbers for WhatsApp links
+
+/* ---------- Data ---------- */
+const KEY = 'campusswap.items.v1';
+const CAMPUS_KEY = 'campusswap.campus.v1';
+const ME_KEY = 'campusswap.me.v1';
+
+const CATS = [
+  {id:'books',       label:'Books',             emoji:'📚'},
+  {id:'calc',        label:'Calculators',       emoji:'🧮'},
+  {id:'furniture',   label:'Furniture',         emoji:'🪑'},
+  {id:'electronics', label:'Electronics',       emoji:'💻'},
+  {id:'bags',        label:'Bags & lab gear',   emoji:'🎒'},
+  {id:'hostel',      label:'Hostel items',      emoji:'🏠'},
+  {id:'tickets',     label:'Event tickets',     emoji:'🎟️'},
+  {id:'cycles',      label:'Cycles',            emoji:'🚲'},
+  {id:'cables',      label:'Chargers & cables', emoji:'🔌'},
+  {id:'other',       label:'Other',             emoji:'📦'}
+];
+const TINT = {books:'#FFE9A8',calc:'#CFE8F0',furniture:'#E6D7C3',electronics:'#D6DEF5',bags:'#DDEBD0',hostel:'#F5D9D9',tickets:'#EBD5F2',cycles:'#CDEBDD',cables:'#F6E3C4',other:'#E2E6EE'};
+const TYPES = {sell:'For sale', swap:'Swap', free:'Free'};
+
+const H = 3600e3, NOW = Date.now();
+const SAMPLES = [
+  {title:'Engineering Mathematics textbook', cat:'books', type:'sell', price:350, cond:'Good', desc:'Some highlighting in the first three chapters. Covers the full first-year syllabus.', seller:'Aarav', ago:3},
+  {title:'Scientific calculator fx-991', cat:'calc', type:'sell', price:700, cond:'Like new', desc:'Used for one semester. Cover and batteries included.', seller:'Meera', ago:9},
+  {title:'Study table with shelf', cat:'furniture', type:'sell', price:1200, cond:'Fair', desc:'Sturdy wooden table, 4 ft wide. Buyer collects from the hostel.', seller:'Rohan', ago:26},
+  {title:'White lab coat, size M', cat:'bags', type:'free', price:0, cond:'Good', desc:'Washed and ready. Pick it up before your first practical.', seller:'Sana', ago:30},
+  {title:'Mechanical keyboard', cat:'electronics', type:'swap', price:0, wants:'A good wireless mouse', cond:'Good', desc:'Blue switches, full size. Works perfectly, just too loud for the hostel.', seller:'Kabir', ago:50},
+  {title:'21-speed cycle', cat:'cycles', type:'sell', price:3500, cond:'Good', desc:'Serviced last month. New tyres and a lock included.', seller:'Ishita', ago:70},
+  {title:'65W Type-C charger', cat:'cables', type:'sell', price:500, cond:'Like new', desc:'Fast charger that works with most laptops and phones.', seller:'Dev', ago:96},
+  {title:'Tech fest night ticket', cat:'tickets', type:'sell', price:400, cond:'Like new', desc:"Can't attend anymore. Ticket transfers by name.", seller:'Nisha', ago:120},
+  {title:'Bucket, mug and hanger set', cat:'hostel', type:'free', price:0, cond:'Good', desc:'Leaving the hostel this month. Take the whole set.', seller:'Arjun', ago:150}
+].map((s,i) => ({wants:'', contact:'', img:'', sold:false, mine:false, sample:true, id:'s'+i, createdAt:NOW - s.ago*H, ...s}));
+
+/* ---------- Helpers ---------- */
+const $ = (s, r=document) => r.querySelector(s);
+const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
+const catOf = id => CATS.find(c => c.id === id) || CATS[CATS.length-1];
+const store = {
+  get(k, d){ try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
+  set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch { return false; } }
+};
+function ago(t){
+  const m = Math.max(1, Math.round((Date.now()-t)/60000));
+  if (m < 60) return m + ' min ago';
+  const h = Math.round(m/60); if (h < 24) return h + (h===1?' hour':' hours') + ' ago';
+  const d = Math.round(h/24); return d + (d===1?' day':' days') + ' ago';
+}
+let toastTimer;
+function toast(msg){
+  const t = $('#toast'); t.textContent = msg; t.classList.add('on');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('on'), 2400);
+}
+function badge(i){
+  const b = el('span', 'badge ' + i.type);
+  b.textContent = i.type === 'sell' ? CURRENCY + Number(i.price).toLocaleString() : i.type === 'swap' ? 'Swap' : 'Free';
+  return b;
+}
+function picture(i, cls){
+  const c = catOf(i.cat), p = el('span', cls);
+  p.style.background = TINT[i.cat] || TINT.other;
+  if (i.img) { const im = el('img'); im.src = i.img; im.alt = cls === 'dpic' ? i.title : ''; im.loading = 'lazy'; p.append(im); }
+  else { const e = el('span', '', c.emoji); e.setAttribute('aria-hidden', 'true'); p.append(e); }
+  p.append(badge(i));
+  if (i.sold) p.append(el('span', 'stamp', 'Sold'));
+  return p;
+}
+
+/* ---------- State ---------- */
+let items = store.get(KEY, null);
+if (!Array.isArray(items)) { items = SAMPLES; store.set(KEY, items); }
+const state = {q:'', cat:'all', type:'all', sort:'new', hideSold:true};
+
+/* ---------- Render ---------- */
+function renderCats(){
+  const box = $('#cats'); box.replaceChildren();
+  [{id:'all', label:'All', emoji:'✨'}, ...CATS].forEach(c => {
+    const b = el('button', 'chip', c.emoji + ' ' + c.label);
+    b.type = 'button'; b.setAttribute('aria-pressed', String(state.cat === c.id));
+    b.addEventListener('click', () => { state.cat = c.id; renderCats(); render(); });
+    box.append(b);
+  });
+}
+function visible(){
+  const q = state.q.trim().toLowerCase();
+  const list = items.filter(i =>
+    (state.cat === 'all' || i.cat === state.cat) &&
+    (state.type === 'all' || i.type === state.type) &&
+    (!state.hideSold || !i.sold) &&
+    (!q || [i.title, i.desc, i.wants, catOf(i.cat).label].join(' ').toLowerCase().includes(q)));
+  const p = i => i.type === 'sell' ? Number(i.price) : i.type === 'free' ? 0 : null;
+  const by = {
+    new: (a,b) => b.createdAt - a.createdAt,
+    low: (a,b) => (p(a) ?? Infinity) - (p(b) ?? Infinity) || b.createdAt - a.createdAt,
+    high:(a,b) => (p(a) ?? -1) === (p(b) ?? -1) ? b.createdAt - a.createdAt : (p(b) ?? -1) - (p(a) ?? -1)
+  }[state.sort];
+  return list.sort((a,b) => (a.sold - b.sold) || by(a,b));
+}
+function card(i){
+  const li = el('li', 'item' + (i.sold ? ' sold' : ''));
+  const b = el('button', 'tag'); b.type = 'button';
+  const info = el('span', 'info');
+  const meta = el('span', 'meta');
+  meta.append(el('span', '', catOf(i.cat).label), el('span', '', ago(i.createdAt)));
+  info.append(el('b', '', i.title), meta);
+  b.append(picture(i, 'pic'), info);
+  b.addEventListener('click', () => openDetail(i.id));
+  li.append(b);
+  return li;
+}
+function render(){
+  const list = visible(), grid = $('#grid');
+  grid.replaceChildren();
+  $('#count').textContent = list.length + (list.length === 1 ? ' item' : ' items');
+  $('#clearSamples').hidden = !items.some(i => i.sample);
+  [...$('#types').children].forEach(b => b.setAttribute('aria-pressed', String(b.dataset.type === state.type)));
+  if (!list.length) {
+    const e = el('li', 'empty');
+    const filtered = state.q || state.cat !== 'all' || state.type !== 'all';
+    e.append(el('h2', '', filtered ? 'Nothing matches yet' : 'No listings yet'),
+             el('p', '', filtered ? 'Try another category or search, or post what you are looking for.' : 'Be the first to post something on your campus.'));
+    const btn = el('button', 'btn', 'Post an item'); btn.type = 'button'; btn.addEventListener('click', openPost);
+    e.append(btn); grid.append(e); return;
+  }
+  list.forEach(i => grid.append(card(i)));
+}
+
+/* ---------- Item detail ---------- */
+function contactAction(i){
+  const c = i.contact.trim(); if (!c) return null;
+  const msg = `Hi ${i.seller}, I saw "${i.title}" on CampusSwap. Is it still available?`;
+  if (c.includes('@')) return {label:'Email seller', href:'mailto:' + encodeURI(c) + '?subject=' + encodeURIComponent('CampusSwap: ' + i.title) + '&body=' + encodeURIComponent(msg)};
+  let d = c.replace(/\D/g, '');
+  if (d.length === 10) d = DEFAULT_COUNTRY_CODE + d;
+  if (d.length >= 11) return {label:'Message on WhatsApp', href:'https://wa.me/' + d + '?text=' + encodeURIComponent(msg)};
+  return null;
+}
+function copy(text, btn){
+  const done = () => { const old = btn.textContent; btn.textContent = 'Copied'; setTimeout(() => btn.textContent = old, 1500); };
+  if (navigator.clipboard) navigator.clipboard.writeText(text).then(done, () => window.prompt('Copy this contact:', text));
+  else window.prompt('Copy this contact:', text);
+}
+function closeBtn(){ const x = el('button', 'x', '×'); x.type = 'button'; x.setAttribute('aria-label', 'Close'); x.dataset.close = ''; return x; }
+function openDetail(id){
+  const i = items.find(x => x.id === id); if (!i) return;
+  const box = $('#detail .dlg'); box.replaceChildren(closeBtn());
+  const dp = picture(i, 'dpic');
+  const facts = el('div', 'facts');
+  [TYPES[i.type], catOf(i.cat).label, i.cond, 'Posted ' + ago(i.createdAt)].forEach(t => t && facts.append(el('span', 'fact', t)));
+  box.append(dp, el('h2', '', i.title), facts);
+  if (i.type === 'swap' && i.wants) { const p = el('p'); p.append(el('strong', '', 'Looking for: '), document.createTextNode(i.wants)); box.append(p); }
+  if (i.desc) box.append(el('p', '', i.desc));
+  box.append(el('p', 'note', 'Listed by ' + i.seller));
+  const act = el('div', 'actions');
+  if (i.sample) {
+    box.append(el('p', 'note', 'This is a sample listing that shows how CampusSwap looks. Post your own item to get started.'));
+  } else if (isMine(i)) {
+    const s = el('button', 'btn', i.sold ? 'Mark as available' : 'Mark as sold'); s.type = 'button';
+    s.addEventListener('click', () => { i.sold = !i.sold; store.set(KEY, items); $('#detail').close(); render(); toast(i.sold ? 'Marked as sold' : 'Back on the board'); });
+    const d = el('button', 'btn danger', 'Delete'); d.type = 'button';
+    d.addEventListener('click', () => { if (confirm('Delete this listing?')) { items = items.filter(x => x !== i); store.set(KEY, items); $('#detail').close(); render(); toast('Listing deleted'); } });
+    act.append(s, d);
+  } else if (i.sold) {
+    box.append(el('p', 'note', 'This item has been sold.'));
+  } else {
+    const a = contactAction(i);
+    if (a) { const l = el('a', 'btn', a.label); l.href = a.href; l.target = '_blank'; l.rel = 'noopener'; act.append(l); }
+    const cp = el('button', 'btn ghost', 'Copy contact'); cp.type = 'button'; cp.addEventListener('click', () => copy(i.contact, cp)); act.append(cp);
+    box.append(el('p', 'note', 'Contact: ' + i.contact));
+  }
+  if (act.children.length) box.append(act);
+  $('#detail').showModal();
+}
+
+/* ---------- Post an item ---------- */
+const form = $('#postForm');
+let photo = '', busy = false;
+function syncType(){
+  const t = form.type.value;
+  $('#priceRow').hidden = t !== 'sell'; form.price.required = t === 'sell';
+  $('#wantsRow').hidden = t !== 'swap';
+}
+function setPhoto(data){
+  photo = data; $('#prev').hidden = !data;
+  if (data) $('#prevImg').src = data; else $('#photo').value = '';
+}
+function shrink(file, max = 640){
+  return new Promise((ok, no) => {
+    const r = new FileReader(); r.onerror = no;
+    r.onload = () => {
+      const im = new Image(); im.onerror = no;
+      im.onload = () => {
+        const s = Math.min(1, max / Math.max(im.width, im.height)), c = document.createElement('canvas');
+        c.width = Math.round(im.width * s); c.height = Math.round(im.height * s);
+        c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
+        ok(c.toDataURL('image/jpeg', .72));
+      };
+      im.src = r.result;
+    };
+    r.readAsDataURL(file);
+  });
+}
+function openPostForm(){
+  form.reset(); setPhoto(''); $('#formErr').textContent = '';
+  const me = store.get(ME_KEY, {}), pr = profile || {};
+  form.seller.value = pr.display_name || me.seller || ''; form.contact.value = pr.contact || me.contact || '';
+  syncType(); $('#postDlg').showModal();
+}
+$('#photo').addEventListener('change', async e => {
+  const f = e.target.files[0]; if (!f) return;
+  busy = true; $('#submitBtn').disabled = true;
+  try { setPhoto(await shrink(f)); $('#formErr').textContent = ''; }
+  catch { setPhoto(''); $('#formErr').textContent = 'That file could not be read as a photo. Try a JPG or PNG.'; }
+  busy = false; $('#submitBtn').disabled = false;
+});
+$('#rmPhoto').addEventListener('click', () => setPhoto(''));
+form.addEventListener('change', e => { if (e.target.name === 'type') syncType(); });
+form.addEventListener('submit', e => {
+  e.preventDefault(); if (busy) return;
+  const d = new FormData(form), type = d.get('type');
+  const item = {
+    id: 'u' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+    title: d.get('title').trim(), cat: d.get('cat'), type,
+    price: type === 'sell' ? Math.max(0, Number(d.get('price')) || 0) : 0,
+    wants: type === 'swap' ? d.get('wants').trim() : '',
+    cond: d.get('cond'), desc: d.get('desc').trim(),
+    seller: d.get('seller').trim(), contact: d.get('contact').trim(),
+    img: photo, createdAt: Date.now(), sold: false, mine: true, sample: false, owner: user ? user.id : ''
+  };
+  items.unshift(item);
+  if (!store.set(KEY, items)) {
+    items.shift();
+    $('#formErr').textContent = 'Your browser storage is full. Remove the photo or delete an old listing, then try again.';
+    return;
+  }
+  store.set(ME_KEY, {seller: item.seller, contact: item.contact});
+  $('#postDlg').close();
+  state.cat = 'all'; state.type = 'all'; state.q = ''; $('#q').value = '';
+  renderCats(); render(); toast('Posted. Your item is on the board.');
+});
+
+/* ---------- Campus name ---------- */
+function showCampus(){ $('#campusBtn').textContent = '📍 ' + (store.get(CAMPUS_KEY, '') || 'Set your campus'); }
+$('#campusBtn').addEventListener('click', () => { $('#campusForm').campus.value = store.get(CAMPUS_KEY, ''); $('#campusDlg').showModal(); });
+$('#campusForm').addEventListener('submit', e => {
+  e.preventDefault(); store.set(CAMPUS_KEY, e.target.campus.value.trim());
+  showCampus(); $('#campusDlg').close(); toast('Campus saved');
+});
+
+/* ---------- Accounts (Supabase Auth) ---------- */
+const SUPABASE_URL = 'https://fjdwpcthqcwxdkgyykge.supabase.co';
+// Public "anon" key. Safe in the browser: what each person can read or change is enforced by row-level security.
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZqZHdwY3RocWN3eGRrZ3l5a2dlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE0NzE4NjIsImV4cCI6MjEwNzA0Nzg2Mn0.M1FQpjPKQXThfT6Nuq8ZTeFNZ586eYTOgKmhvqcovYQ';
+const MIN_PW = 8;
+let sb = null, user = null, profile = null, afterAuth = null, mode = 'login';
+
+// Read the result of an email link before the client clears it from the address bar
+const hashInfo = new URLSearchParams(location.hash.slice(1));
+const linkError = hashInfo.get('error_description');
+let fromEmail = hashInfo.get('type') === 'signup';
+try {
+  if (window.supabase) sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {auth: {persistSession: true, autoRefreshToken: true, detectSessionInUrl: true}});
+} catch { sb = null; }
+
+const isMine = i => i.owner ? !!user && i.owner === user.id : !!i.mine;
+const redirectUrl = () => /^https?:$/.test(location.protocol) ? location.origin + location.pathname : undefined;
+const say = (sel, text, ok) => { const p = $(sel); p.textContent = text || ''; p.classList.toggle('ok', !!ok); };
+const pending = (btn, on, label) => { btn.disabled = on; btn.textContent = on ? 'Please wait…' : label; };
+const OFFLINE = 'Accounts are unavailable right now. Check your connection and reload the page.';
+
+function friendly(err){
+  const m = String(err && err.message || '').toLowerCase();
+  if (m.includes('invalid login')) return 'That email and password do not match. Check both and try again.';
+  if (m.includes('not confirmed')) return 'Confirm your email first. Open the link we sent you, then log in.';
+  if (m.includes('already registered')) return 'An account with this email already exists. Log in instead.';
+  if (m.includes('rate limit') || (err && err.status === 429)) return 'Too many attempts. Wait a few minutes and try again.';
+  if (m.includes('same password') || m.includes('different from the old')) return 'Choose a password that is different from your current one.';
+  if (m.includes('session missing') || m.includes('expired')) return 'Your session has expired. Log in again.';
+  if (m.includes('password')) return 'Choose a stronger password with at least ' + MIN_PW + ' characters.';
+  if (m.includes('fetch') || m.includes('network')) return 'No connection. Check your internet and try again.';
+  return (err && err.message) || 'Something went wrong. Try again.';
+}
+
+async function loadProfile(){
+  profile = null;
+  if (!sb || !user) return;
+  try {
+    const {data, error} = await sb.from('profiles').select('display_name, contact').eq('id', user.id).maybeSingle();
+    if (error) throw error;
+    profile = data;
+  } catch {}
+  if (!profile) profile = {display_name: (user.user_metadata && user.user_metadata.display_name) || '', contact: ''};
+}
+function renderAuth(){
+  $('#loginBtn').hidden = !!user; $('#acctBtn').hidden = !user;
+  if (user) $('#acctBtn').textContent = '👤 ' + (((profile && profile.display_name) || user.email || '').split(/[\s@]/)[0] || 'Account');
+}
+
+/* Log in / sign up / forgot password */
+const AUTH_COPY = {
+  login:  {title: 'Welcome back',          sub: 'Log in to post items and manage your listings.', btn: 'Log in'},
+  signup: {title: 'Create your account',   sub: 'Sign up with an email you can open. It takes a minute.', btn: 'Create account'},
+  forgot: {title: 'Reset your password',   sub: 'Enter your email and we will send you a link to set a new password.', btn: 'Send reset link'}
+};
+function setMode(m, note){
+  mode = m; const c = AUTH_COPY[m], f = $('#authForm');
+  $('#authTitle').textContent = c.title; $('#authSub').textContent = note || c.sub; $('#authSubmit').textContent = c.btn;
+  [...$('#authTabs').children].forEach(b => b.setAttribute('aria-pressed', String(b.dataset.mode === m)));
+  $('#nameRow').hidden = m !== 'signup';
+  $('#pwRow').hidden = $('#showRow').hidden = m === 'forgot';
+  $('#pwHint').textContent = m === 'signup' ? 'At least ' + MIN_PW + ' characters' : '';
+  f.password.autocomplete = m === 'signup' ? 'new-password' : 'current-password';
+  $('#forgotBtn').textContent = m === 'forgot' ? 'Back to log in' : 'Forgot password?';
+  $('#forgotBtn').hidden = m === 'signup';
+  say('#authMsg', sb ? '' : OFFLINE);
+}
+function openAuth(m = 'login', after = null, note = ''){
+  afterAuth = after; setMode(m, note);
+  const f = $('#authForm'); f.password.value = ''; f.password.type = 'password'; $('#showPw').checked = false;
+  $('#authDlg').showModal();
+}
+async function finishAuth(msg){
+  await loadProfile(); renderAuth(); render();
+  $('#authDlg').close(); $('#authForm').reset(); toast(msg);
+  const go = afterAuth; afterAuth = null; if (go) setTimeout(go, 300);
+}
+$('#authTabs').addEventListener('click', e => { const b = e.target.closest('button'); if (b) setMode(b.dataset.mode); });
+$('#forgotBtn').addEventListener('click', () => setMode(mode === 'forgot' ? 'login' : 'forgot'));
+$('#showPw').addEventListener('change', e => { $('#authForm').password.type = e.target.checked ? 'text' : 'password'; });
+$('#authForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const f = e.target, email = f.email.value.trim(), pw = f.password.value, name = f.display_name.value.trim();
+  if (!sb) return say('#authMsg', OFFLINE);
+  if (!/^\S+@\S+\.\S+$/.test(email)) return say('#authMsg', 'Enter a valid email address.');
+  if (mode !== 'forgot' && !pw) return say('#authMsg', 'Enter your password.');
+  if (mode === 'signup') {
+    if (!name) return say('#authMsg', 'Enter your name.');
+    if (pw.length < MIN_PW) return say('#authMsg', 'Use at least ' + MIN_PW + ' characters for your password.');
+  }
+  const btn = $('#authSubmit'), label = btn.textContent;
+  say('#authMsg', ''); pending(btn, true, label);
+  try {
+    if (mode === 'login') {
+      const {error} = await sb.auth.signInWithPassword({email, password: pw});
+      if (error) throw error;
+      await finishAuth('Logged in');
+    } else if (mode === 'signup') {
+      const {data, error} = await sb.auth.signUp({email, password: pw, options: {data: {display_name: name}, emailRedirectTo: redirectUrl()}});
+      if (error) throw error;
+      if (data.user && data.user.identities && data.user.identities.length === 0) throw {message: 'already registered'};
+      if (data.session) await finishAuth('Account created. Welcome to CampusSwap');
+      else { f.reset(); say('#authMsg', 'Check ' + email + ' for a confirmation link. Open it, then log in.', true); }
+    } else {
+      const {error} = await sb.auth.resetPasswordForEmail(email, {redirectTo: redirectUrl()});
+      if (error) throw error;
+      say('#authMsg', 'If an account exists for ' + email + ', a reset link is on its way.', true);
+    }
+  } catch (err) { say('#authMsg', friendly(err)); }
+  pending(btn, false, label);
+});
+
+/* New password: after a reset link, and from the account dialog */
+async function savePassword(form, msg, btn, label, done){
+  const p = form.password.value;
+  if (p.length < MIN_PW) return say(msg, 'Use at least ' + MIN_PW + ' characters.');
+  if (p !== form.confirm.value) return say(msg, 'The two passwords do not match.');
+  if (!sb || !user) return say(msg, 'Your session has expired. Log in again.');
+  say(msg, ''); pending(btn, true, label);
+  try {
+    const {error} = await sb.auth.updateUser({password: p});
+    if (error) throw error;
+    form.reset(); done();
+  } catch (err) { say(msg, friendly(err)); }
+  pending(btn, false, label);
+}
+function openReset(){ $('#authDlg').close(); $('#resetForm').reset(); say('#resetMsg', ''); $('#resetDlg').showModal(); }
+$('#resetForm').addEventListener('submit', e => {
+  e.preventDefault();
+  savePassword(e.target, '#resetMsg', $('#resetSubmit'), 'Save new password', () => { $('#resetDlg').close(); toast('Password updated. You are logged in.'); });
+});
+$('#pwForm').addEventListener('submit', e => {
+  e.preventDefault();
+  savePassword(e.target, '#pwMsg', $('#pwSubmit'), 'Change password', () => say('#pwMsg', 'Password changed.', true));
+});
+
+/* Account dialog */
+function openAcct(){
+  if (!user) return openAuth();
+  const pr = profile || {}, f = $('#profileForm');
+  $('#acctEmail').textContent = user.email;
+  f.display_name.value = pr.display_name || ''; f.contact.value = pr.contact || '';
+  say('#profileMsg', ''); say('#pwMsg', ''); $('#pwForm').reset();
+  $('#acctDlg').showModal();
+}
+$('#profileForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const f = e.target, name = f.display_name.value.trim(), contact = f.contact.value.trim(), btn = $('#profileSubmit');
+  if (!name) return say('#profileMsg', 'Enter your name.');
+  if (!sb || !user) return say('#profileMsg', 'Your session has expired. Log in again.');
+  say('#profileMsg', ''); pending(btn, true, 'Save details');
+  try {
+    const {error} = await sb.from('profiles').upsert({id: user.id, display_name: name, contact});
+    if (error) throw error;
+    profile = {display_name: name, contact}; renderAuth(); say('#profileMsg', 'Details saved.', true);
+  } catch (err) { say('#profileMsg', friendly(err)); }
+  pending(btn, false, 'Save details');
+});
+$('#logoutBtn').addEventListener('click', async () => {
+  try { if (sb) await sb.auth.signOut({scope: 'local'}); } catch {}
+  user = null; profile = null; renderAuth(); render();
+  $('#acctDlg').close(); toast('Logged out');
+});
+$('#loginBtn').addEventListener('click', () => openAuth('login'));
+$('#acctBtn').addEventListener('click', openAcct);
+
+/* Posting needs an account */
+function openPost(){
+  if (sb && !user) return openAuth('login', openPostForm, 'Log in to post an item. New here? Choose Sign up.');
+  openPostForm();
+}
+
+/* Keep the page in step with the session (also covers email links and other tabs) */
+if (sb) sb.auth.onAuthStateChange((event, session) => {
+  user = session ? session.user : null;
+  setTimeout(async () => {   // never call Supabase from inside this callback directly
+    await loadProfile(); renderAuth(); render();
+    if (!user) $('#acctDlg').close();
+    if (event === 'PASSWORD_RECOVERY') openReset();
+    else if (event === 'SIGNED_IN' && fromEmail) { fromEmail = false; toast('Email confirmed. You are logged in.'); }
+  }, 0);
+});
+
+/* ---------- Wiring ---------- */
+$('#postBtn').addEventListener('click', openPost);
+$('#searchForm').addEventListener('submit', e => { e.preventDefault(); $('#results').scrollIntoView(); });
+$('#q').addEventListener('input', e => { state.q = e.target.value; render(); });
+$('#types').addEventListener('click', e => { const b = e.target.closest('button'); if (b) { state.type = b.dataset.type; render(); } });
+$('#sort').addEventListener('change', e => { state.sort = e.target.value; render(); });
+$('#hideSold').addEventListener('change', e => { state.hideSold = e.target.checked; render(); });
+$('#clearSamples').addEventListener('click', () => {
+  if (!confirm('Remove all sample listings? Your own posts stay.')) return;
+  items = items.filter(i => !i.sample); store.set(KEY, items); render();
+});
+document.addEventListener('click', e => {
+  if (e.target.closest('[data-close]')) e.target.closest('dialog').close();
+  else if (e.target.tagName === 'DIALOG') e.target.close();   // click on backdrop
+});
+$('#catSel').append(...CATS.map(c => { const o = el('option', '', c.emoji + ' ' + c.label); o.value = c.id; return o; }));
+$('#priceLbl').textContent = 'Price (' + CURRENCY + ')';
+
+showCampus(); renderAuth(); renderCats(); render();
+if (linkError) setTimeout(() => toast(linkError), 500);
+})();
+</script>
+</body>
+</html>
